@@ -1,0 +1,52 @@
+# The pipeline.
+python-arango>=8.1.6
+openai>=2.3.0
+numpy>=1.26
+requests>=2.32.4
+
+# graphrag_importer's extraction half, run in-process. These are the packages in
+# its `graphrag` dependency group that the extract/import path actually touches:
+# networkx is the workbench graph, graspologic is Leiden, cityhash is the id
+# function, json-repair salvages a community report the model returns malformed,
+# and rich draws the importer's progress bars.
+networkx>=3.4
+graspologic==3.3.0
+cityhash>=0.4.8
+json-repair>=0.54
+rich>=13
+scipy>=1.9
+tiktoken>=0.7
+tenacity>=9
+xxhash>=3.5
+# graspologic imports pkg_resources, which setuptools removed in 81.
+setuptools<81
+
+# AQLizer. natural-language-service imports these; txt2aql's generated protobuf
+# module needs betterproto and grpclib even though nothing here speaks gRPC.
+langchain-arangodb>=2.1.0,<3
+langchain-openai>=1.4,<2
+betterproto==2.0.0b7
+grpclib>=0.4.9
+# txt2aql's llm_factory imports its Triton provider at module level, so the
+# client has to be installed even though everything here goes to OpenAI.
+tritonclient[grpc,http]>=2.42
+
+# GraphRAG retrieval. graphrag_retrievers imports these; its tracing module needs
+# the OTel exporters present even with telemetry switched off.
+validators>=0.35
+opentelemetry-exporter-otlp-proto-http>=1.30
+opentelemetry-exporter-otlp-proto-grpc>=1.30
+opentelemetry-instrumentation-logging>=0.50b0
+
+# Notebooks.
+ipykernel
+nbconvert
+
+# Two more come from Arango's private index and cannot be resolved from PyPI:
+#
+#   TOKEN=$(gcloud auth application-default print-access-token)
+#   uv pip install --extra-index-url \
+#     "https://oauth2accesstoken:${TOKEN}@europe-west3-python.pkg.dev/arango-ml/arango-ml-internal-pypi/simple" \
+#     arangodb-platform-internal arango-platform-clients
+#
+# The token lasts about an hour; re-run the export if the install 401s.
